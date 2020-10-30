@@ -297,7 +297,7 @@ Start `ielm' if it's not already running."
   :ensure t
   :init
   (setq projectile-completion-system 'ivy)
-  (setq projectile-project-search-path '("~/projects/" "~/toptal/"))
+  ;; (setq projectile-project-search-path '("~/projects/" "~/toptal/"))
   :config
   ;; I typically use this keymap prefix on macOS
   (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
@@ -513,6 +513,7 @@ Start `ielm' if it's not already running."
 
 (use-package crux
   :ensure t
+  :disabled t
   :bind (("C-c o" . crux-open-with)
          ("M-o" . crux-smart-open-line)
          ("C-c n" . crux-cleanup-buffer-or-region)
@@ -616,6 +617,101 @@ Start `ielm' if it's not already running."
   :ensure t
   :config
   (volatile-highlights-mode +1))
+
+(use-package beacon
+  :ensure t)
+
+(use-package god-mode
+  :ensure t
+  :config (god-mode)
+  (global-set-key (kbd "<escape>") #'god-mode-all)
+
+  (defun my-god-mode-update-cursor ()
+    (setq cursor-type (if (or god-local-mode buffer-read-only)
+                          'box
+                        'bar)))
+
+  (add-hook 'god-mode-enabled-hook #'my-god-mode-update-cursor)
+  (add-hook 'god-mode-disabled-hook #'my-god-mode-update-cursor)
+
+  (define-key god-local-mode-map (kbd "i") #'god-local-mode))
+
+(use-package modus-operandi-theme
+  :ensure t)
+
+(use-package modus-vivendi-theme
+  :ensure t)
+
+(setq custom-safe-themes t)
+(load-theme 'modus-vivendi)
+
+(use-package deft
+  :ensure t
+  :config
+  (setq deft-extensions '("org" "md" "txt"))
+  (setq deft-directory "~/org/org-roam")
+  (setq deft-use-filename-as-title t))
+
+(use-package zetteldeft
+  :ensure t
+  :after deft
+  :commands 'deft-find-file
+  :config
+  (zetteldeft-set-classic-keybindings)
+  (progn
+    (defvar deft-trigger-map (make-sparse-keymap))
+    (fset 'deft-trigger-map deft-trigger-map)
+    (define-prefix-command 'deft-trigger-map)
+    (define-key deft-trigger-map (kbd "d") 'deft)
+    (define-key deft-trigger-map (kbd "o") 'deft-find-file)
+    (define-key deft-trigger-map (kbd "D") 'zetteldeft-deft-new-search)
+    (define-key deft-trigger-map (kbd "R") 'deft-refresh)
+    (define-key deft-trigger-map (kbd "s") 'zetteldeft-search-at-point)
+    (define-key deft-trigger-map (kbd "c") 'zetteldeft-search-current-id)
+    (define-key deft-trigger-map (kbd "f") 'zetteldeft-follow-link)
+    (define-key deft-trigger-map (kbd "F") 'zetteldeft-avy-file-search-ace-window)
+    (define-key deft-trigger-map (kbd "l") 'zetteldeft-avy-link-search)
+    (define-key deft-trigger-map (kbd "t") 'zetteldeft-avy-tag-search)
+    (define-key deft-trigger-map (kbd "T") 'zetteldeft-tag-buffer)
+    (define-key deft-trigger-map (kbd "i") 'zetteldeft-find-file-id-insert)
+    (define-key deft-trigger-map (kbd "I") 'zetteldeft-find-file-full-title-insert)
+    (define-key deft-trigger-map (kbd "n") 'zetteldeft-new-file)
+    (define-key deft-trigger-map (kbd "N") 'zetteldeft-new-file-and-link)
+    (define-key deft-trigger-map (kbd "r") 'zetteldeft-file-rename)
+    (define-key deft-trigger-map (kbd "x") 'zetteldeft-count-words))
+
+  (global-set-key (kbd "s-, d") deft-trigger-map))
+
+
+(use-package org-roam
+  :ensure t
+  :config
+  (add-hook 'org-mode-hook 'org-roam-mode)
+  (setq org-roam-directory "~/org/org-roam/")
+  (progn
+    (defvar roam-trigger-map (make-sparse-keymap))
+    (fset 'roam-trigger-map roam-trigger-map)
+    (define-prefix-command 'roam-trigger-map)
+    (define-key roam-trigger-map (kbd "l") 'org-roam)
+    (define-key roam-trigger-map (kbd "f") 'org-roam-find-file)
+    (define-key roam-trigger-map (kbd "g") 'org-roam-graph)
+    (define-key roam-trigger-map (kbd "i") 'org-roam-insert)
+    (define-key roam-trigger-map (kbd "I") 'org-roam-insert-immediate)
+    (define-key roam-trigger-map (kbd "b") 'org-roam-db-build-cache)
+    (define-key roam-trigger-map (kbd "c") 'org-roam-capture))
+
+  (global-set-key (kbd "s-, r") roam-trigger-map)
+  )
+
+(use-package org-bullets
+  :ensure t
+  :config
+  (add-hook 'org-mode-hook 'org-bullets-mode))
+
+(use-package ace-jump-mode
+  :ensure t
+  :config
+  (define-key global-map (kbd "s-, jj") 'ace-jump-mode))
 
 ;; WSL-specific setup
 (when (and (eq system-type 'gnu/linux) (getenv "WSLENV"))
